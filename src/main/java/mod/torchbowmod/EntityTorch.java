@@ -19,8 +19,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-import java.util.Random;
-
 import static mod.torchbowmod.TorchBowMod.CeilingTorch;
 import static mod.torchbowmod.TorchBowMod.entityTorch;
 import static net.minecraft.core.Direction.DOWN;
@@ -60,6 +58,11 @@ public class EntityTorch extends AbstractArrow {
                 setTorch(raytraceResultIn, raytraceResultIn);
             }
         }
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem() {
+        return new ItemStack(Blocks.TORCH);
     }
 
     private void creeperIgnite(Creeper creeper){

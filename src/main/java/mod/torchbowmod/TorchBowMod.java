@@ -14,11 +14,12 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -34,14 +35,10 @@ public class TorchBowMod {
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    //@ObjectHolder(registryName = "torchbandolier:torch_bandolier", value = "torch_bandolier")
-    public static Item torchbinder = null;
-    //@ObjectHolder(registryName = "storagebox:storagebox", value = "storagebox")
-    public static Item StorageBox = null;
     //@ObjectHolder(registryName = "ceilingtorch:torch", value = "ceilingtorch")
     public static Block CeilingTorch = null;
 
-    public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().defaultDurability(384)));
+    public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().durability(384)));
     public static DeferredItem<Item> multiTorch = ITEMS.register("multitorch", () -> new Item(new Item.Properties().stacksTo(64)));
     public static DeferredItem<Item> torchArrow = ITEMS.register("torcharrow", () -> new TorchArrow(new Item.Properties().stacksTo(64)));
     public static DeferredHolder<EntityType<?>, EntityType<EntityTorch>> entityTorch = ENTITY_TYPES.register("entitytorch", () ->
@@ -61,7 +58,7 @@ public class TorchBowMod {
                         output.accept(torchArrow.get());
                     }).build());
 
-    public TorchBowMod(IEventBus modEventBus) {
+    public TorchBowMod(IEventBus modEventBus, ModContainer modContainer) {
         ITEMS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         TAB.register(modEventBus);
@@ -84,16 +81,12 @@ public class TorchBowMod {
         });
     }
 
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class RegistryEvents {
         @SubscribeEvent
         public static void registerEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(entityTorch.get(), RenderTorch::new);
         }
-        @SubscribeEvent
-        public static void registerCreativeModeTab(final BuildCreativeModeTabContentsEvent event) {
-        }
     }
-
 }
 
