@@ -19,6 +19,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import javax.annotation.Nullable;
+
 import static mod.torchbowmod.TorchBowMod.CeilingTorch;
 import static mod.torchbowmod.TorchBowMod.entityTorch;
 import static net.minecraft.core.Direction.DOWN;
@@ -28,13 +30,14 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 
 public class EntityTorch extends AbstractArrow {
 
-    public EntityTorch(Level worldIn, LivingEntity shooter,ItemStack pickup) {
-        super(entityTorch.get(), shooter, worldIn,pickup);
+    public EntityTorch(EntityType<EntityTorch> entityTorchEntityType, Level level) {
+        super(entityTorchEntityType,level);
     }
 
-    public EntityTorch(EntityType<EntityTorch> entityTorchEntityType, Level level) {
-        super(entityTorchEntityType,level,new ItemStack(Blocks.TORCH));
+    public EntityTorch(Level worldIn, LivingEntity shooter, ItemStack pickup, @Nullable ItemStack weaponStack) {
+        super(entityTorch.get(), shooter, worldIn,pickup, weaponStack);
     }
+
 
     @Override
     protected void onHitEntity(EntityHitResult entityRayTraceResult) {

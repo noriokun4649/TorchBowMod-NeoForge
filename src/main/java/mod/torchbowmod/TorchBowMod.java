@@ -4,6 +4,7 @@ package mod.torchbowmod;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -17,10 +18,8 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -38,16 +37,24 @@ public class TorchBowMod {
     //@ObjectHolder(registryName = "ceilingtorch:torch", value = "ceilingtorch")
     public static Block CeilingTorch = null;
 
-    public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().durability(384)));
-    public static DeferredItem<Item> multiTorch = ITEMS.register("multitorch", () -> new Item(new Item.Properties().stacksTo(64)));
-    public static DeferredItem<Item> torchArrow = ITEMS.register("torcharrow", () -> new TorchArrow(new Item.Properties().stacksTo(64)));
+    public static final ResourceLocation TORCH_BOW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torchbow");
+    public static final ResourceLocation MULCH_TORCH_ID = ResourceLocation.fromNamespaceAndPath(MODID, "multitorch");
+    public static final ResourceLocation TORCH_ARROW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torcharrow");
+    public static final ResourceLocation TORCH_ENTITY = ResourceLocation.fromNamespaceAndPath(MODID,"entitytorch");
+    public static final ResourceKey<Item> TORCH_BOW_KEY = ResourceKey.create(Registries.ITEM, TORCH_BOW_ID);
+    public static final ResourceKey<Item> MULCH_TORCH_KEY = ResourceKey.create(Registries.ITEM, MULCH_TORCH_ID);
+    public static final ResourceKey<Item> TORCH_ARROW_KEY = ResourceKey.create(Registries.ITEM, TORCH_ARROW_ID);
+    public static final ResourceKey<EntityType<?>> TORCH_ENTITY_ID = ResourceKey.create(Registries.ENTITY_TYPE, TORCH_ENTITY);
+    public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().setId(TORCH_BOW_KEY).durability(384)));
+    public static DeferredItem<Item> multiTorch = ITEMS.register("multitorch", () -> new Item(new Item.Properties().setId(MULCH_TORCH_KEY).stacksTo(64)));
+    public static DeferredItem<Item> torchArrow = ITEMS.register("torcharrow", () -> new TorchArrow(new Item.Properties().setId(TORCH_ARROW_KEY).stacksTo(64)));
     public static DeferredHolder<EntityType<?>, EntityType<EntityTorch>> entityTorch = ENTITY_TYPES.register("entitytorch", () ->
             EntityType.Builder.<EntityTorch>of(EntityTorch::new, MobCategory.MISC)
                     .setTrackingRange(60)
                     .setUpdateInterval(5)
                     .setShouldReceiveVelocityUpdates(true)
                     .sized(0.5F, 0.5F)
-                    .build(MODID + ":entitytorch"));
+                    .build(TORCH_ENTITY_ID));
     public static DeferredHolder<CreativeModeTab, CreativeModeTab> torchTab = TAB.register("torchbowmodtab", () ->
             CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.torchBowModTab"))
@@ -69,14 +76,14 @@ public class TorchBowMod {
         event.enqueueWork(() ->
         {
             ItemProperties.register(torchbow.get(),
-                    new ResourceLocation("pull"), (itemStack, world, livingEntity, num) -> {
+                    ResourceLocation.withDefaultNamespace("pull"), (itemStack, world, livingEntity, num) -> {
                         if (livingEntity == null) {
                             return 0.0F;
                         } else {
-                            return livingEntity.getUseItem() != itemStack ? 0.0F : (float) (itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0F;
+                            return livingEntity.getUseItem() != itemStack ? 0.0F : (float) (itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks()) / 20.0F;
                         }
                     });
-            ItemProperties.register(torchbow.get(), new ResourceLocation("pulling"), (itemStack, world, livingEntity, num)
+            ItemProperties.register(torchbow.get(), ResourceLocation.withDefaultNamespace("pulling"), (itemStack, world, livingEntity, num)
                     -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F);
         });
     }

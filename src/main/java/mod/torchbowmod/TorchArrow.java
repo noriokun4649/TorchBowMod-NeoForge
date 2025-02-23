@@ -6,6 +6,8 @@ import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
+
 public class TorchArrow extends ArrowItem {
 
     public TorchArrow(Properties properties) {
@@ -13,8 +15,8 @@ public class TorchArrow extends ArrowItem {
     }
 
     @Override
-    public AbstractArrow createArrow(Level level, ItemStack itemStack, LivingEntity livingEntity) {
-        EntityTorch torch = new EntityTorch(level, livingEntity, itemStack.copyWithCount(1));
+    public AbstractArrow createArrow(Level level, ItemStack itemStack, LivingEntity livingEntity, @Nullable ItemStack weaponStack) {
+        EntityTorch torch = new EntityTorch(level, livingEntity, itemStack.copyWithCount(1),weaponStack);
         return torch;
     }
 
