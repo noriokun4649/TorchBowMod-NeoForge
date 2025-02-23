@@ -1,8 +1,7 @@
 package mod.torchbowmod;
 
-
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,22 +18,19 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Mod(TorchBowMod.MODID)
 public class TorchBowMod {
     public static final String MODID = "torchbowmod";
-    public static Logger LOGGER = LogManager.getLogger("TorchBowMod");
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    //@ObjectHolder(registryName = "ceilingtorch:torch", value = "ceilingtorch")
     public static Block CeilingTorch = null;
 
     public static final ResourceLocation TORCH_BOW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torchbow");
@@ -70,24 +66,15 @@ public class TorchBowMod {
         ENTITY_TYPES.register(modEventBus);
         TAB.register(modEventBus);
         modEventBus.addListener(this::initClient);
+        modEventBus.addListener(this::preInit);
     }
 
     private void initClient(final FMLClientSetupEvent event) {
-        event.enqueueWork(() ->
-        {
-            ItemProperties.register(torchbow.get(),
-                    ResourceLocation.withDefaultNamespace("pull"), (itemStack, world, livingEntity, num) -> {
-                        if (livingEntity == null) {
-                            return 0.0F;
-                        } else {
-                            return livingEntity.getUseItem() != itemStack ? 0.0F : (float) (itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks()) / 20.0F;
-                        }
-                    });
-            ItemProperties.register(torchbow.get(), ResourceLocation.withDefaultNamespace("pulling"), (itemStack, world, livingEntity, num)
-                    -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F);
-        });
     }
 
+    private void preInit(final FMLCommonSetupEvent event) {
+        CeilingTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "torch"));
+    }
     @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class RegistryEvents {
         @SubscribeEvent

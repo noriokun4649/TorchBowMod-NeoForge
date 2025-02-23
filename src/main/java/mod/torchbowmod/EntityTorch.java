@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +41,7 @@ public class EntityTorch extends AbstractArrow {
 
 
     @Override
-    protected void onHitEntity(EntityHitResult entityRayTraceResult) {
+    protected void onHitEntity(@NotNull EntityHitResult entityRayTraceResult) {
         super.onHitEntity(entityRayTraceResult);
         Entity entity = entityRayTraceResult.getEntity();
         if (entity instanceof Creeper creeper){
@@ -50,7 +51,7 @@ public class EntityTorch extends AbstractArrow {
     }
 
     @Override
-    protected void onHitBlock(BlockHitResult raytraceResultIn) {
+    protected void onHitBlock(@NotNull BlockHitResult raytraceResultIn) {
         super.onHitBlock(raytraceResultIn);
         HitResult.Type raytraceresult$type = raytraceResultIn.getType();
         if (raytraceresult$type == HitResult.Type.BLOCK) {
@@ -64,7 +65,7 @@ public class EntityTorch extends AbstractArrow {
     }
 
     @Override
-    protected ItemStack getDefaultPickupItem() {
+    protected @NotNull ItemStack getDefaultPickupItem() {
         return new ItemStack(Blocks.TORCH);
     }
 
@@ -100,7 +101,7 @@ public class EntityTorch extends AbstractArrow {
                         torch_state = Blocks.TORCH.defaultBlockState();
                         level().setBlock(setBlockPos,torch_state,3);
                         this.remove(RemovalReason.KILLED);
-                    } else if (face == DOWN && CeilingTorch != null) {
+                    } else if (face == DOWN && CeilingTorch != Blocks.AIR) {
                         BlockState ceiling_torch = CeilingTorch.defaultBlockState();
                         level().setBlock(setBlockPos, ceiling_torch,3);
                         this.remove(RemovalReason.KILLED);
