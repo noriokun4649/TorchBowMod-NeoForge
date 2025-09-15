@@ -6,13 +6,16 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.event.EventHooks;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -30,20 +33,12 @@ public class TorchBow extends ProjectileWeaponItem {
     public static final Predicate<ItemStack> TORCH_BOW_ONLY;
 
     private class Offsets {
-        private float X;
-        private float Y;
+        private final float X;
+        private final float Y;
 
         Offsets(float x,float y){
             this.X = x;
             this.Y = y;
-        }
-
-        public float getX() {
-            return X;
-        }
-
-        public float getY() {
-            return Y;
         }
     }
 
@@ -56,29 +51,22 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    public boolean releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i1) {
-        if (!(livingEntity instanceof Player player)) {
-            return false;
-        } else {
-            ItemStack itemstack = player.getProjectile(itemStack);
-            if (itemstack.isEmpty()) {
-                return false;
-            } else {
-                int i = this.getUseDuration(itemStack, livingEntity) - i1;
-                i = EventHooks.onArrowLoose(itemStack, level, player, i, true);
-                if (i < 0) return false;
-
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft) {
+        if (entityLiving instanceof Player player) {
+            ItemStack itemstack = player.getProjectile(stack);
+            if (!itemstack.isEmpty()) {
+                int i = this.getUseDuration(stack, entityLiving) - timeLeft;
+                i = net.neoforged.neoforge.event.EventHooks.onArrowLoose(stack, level, player, i, !itemstack.isEmpty());
+                if (i < 0) return;
                 float f = getPowerForTime(i);
-                if ((double)f < 0.1) {
-                    return false;
-                } else {
-                    List<ItemStack> list = draw(itemStack, itemstack, player);
+                if (!((double)f < 0.1)) {
+                    List<ItemStack> list = draw(stack, itemstack, player);
                     if (level instanceof ServerLevel serverlevel && !list.isEmpty()) {
                         if (list.getFirst().is(multiTorch.get())){
                             ItemStack item = list.getFirst().copy();
                             list.addAll(Collections.nCopies(8, item));
                         }
-                        this.shoot(serverlevel, player, player.getUsedItemHand(), itemStack, list, f * 3.0F, 1.0F, f == 1.0F, null);
+                        this.shoot(serverlevel, player, player.getUsedItemHand(), stack, list, f * 3.0F, 1.0F, f == 1.0F, null);
                     }
 
                     level.playSound(
@@ -92,14 +80,13 @@ public class TorchBow extends ProjectileWeaponItem {
                             1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F
                     );
                     player.awardStat(Stats.ITEM_USED.get(this));
-                    return true;
                 }
             }
         }
     }
 
     @Override
-    protected void shootProjectile(LivingEntity livingEntity, Projectile projectile, int i, float v, float v1, float v2, @Nullable LivingEntity livingEntity1) {
+    protected void shootProjectile(@NotNull LivingEntity livingEntity, @NotNull Projectile projectile, int i, float v, float v1, float v2, @Nullable LivingEntity livingEntity1) {
         float offsetX = 0F;
         float offsetY = 0F;
         if (i < 9){
@@ -132,30 +119,32 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
+    public int getUseDuration(@NotNull ItemStack itemStack, @NotNull LivingEntity livingEntity) {
         return 72000;
     }
 
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
-        return ItemUseAnimation.BOW;
+    public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
-        ItemStack itemstack = player.getItemInHand(interactionHand);
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+        ItemStack itemstack = player.getItemInHand(usedHand);
         boolean flag = !player.getProjectile(itemstack).isEmpty();
-        InteractionResult ret = EventHooks.onArrowNock(itemstack, level, player, interactionHand, flag);
+
+        InteractionResultHolder<ItemStack> ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(itemstack, level, player, usedHand, flag);
         if (ret != null) return ret;
+
         if (!player.hasInfiniteMaterials() && !flag) {
-            return InteractionResult.FAIL;
+            return InteractionResultHolder.fail(itemstack);
         } else {
-            player.startUsingItem(interactionHand);
-            return InteractionResult.CONSUME;
+            player.startUsingItem(usedHand);
+            return InteractionResultHolder.consume(itemstack);
         }
     }
 
-    public Predicate<ItemStack> getAllSupportedProjectiles() {
+    public @NotNull Predicate<ItemStack> getAllSupportedProjectiles() {
         return TORCH_BOW_ONLY;
     }
 
@@ -164,7 +153,7 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    protected Projectile createProjectile(Level worldIn, LivingEntity livingEntity, ItemStack weaponStack, ItemStack pickupItem, boolean p_336242_) {
+    protected @NotNull Projectile createProjectile(@NotNull Level worldIn, @NotNull LivingEntity livingEntity, @NotNull ItemStack weaponStack, ItemStack pickupItem, boolean p_336242_) {
         if (pickupItem.is(multiTorch.get())) pickupItem = Items.TORCH.getDefaultInstance();
         EntityTorch abstractedly = new EntityTorch(worldIn, livingEntity, pickupItem.copyWithCount(1), weaponStack);
         return abstractedly;
