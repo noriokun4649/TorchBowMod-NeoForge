@@ -75,7 +75,7 @@ public class TorchBowMod {
     private void preInit(final FMLCommonSetupEvent event) {
         CeilingTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "torch"));
     }
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = TorchBowMod.MODID, value = Dist.CLIENT)
     public static class RegistryEvents {
         @SubscribeEvent
         public static void registerEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
