@@ -1,20 +1,21 @@
 package mod.torchbowmod;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -24,6 +25,12 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.mojang.text2speech.Narrator.LOGGER;
+import static mod.torchbowmod.TorchBow.TORCH_ITEMS;
+
 @Mod(TorchBowMod.MODID)
 public class TorchBowMod {
     public static final String MODID = "torchbowmod";
@@ -32,6 +39,7 @@ public class TorchBowMod {
     private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static Block CeilingTorch = null;
+    public static Block CeilingSoulTorch = null;
 
     public static final ResourceLocation TORCH_BOW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torchbow");
     public static final ResourceLocation MULCH_TORCH_ID = ResourceLocation.fromNamespaceAndPath(MODID, "multitorch");
@@ -51,22 +59,24 @@ public class TorchBowMod {
                     .setShouldReceiveVelocityUpdates(true)
                     .sized(0.5F, 0.5F)
                     .build(TORCH_ENTITY_ID));
-    public static DeferredHolder<CreativeModeTab, CreativeModeTab> torchTab = TAB.register("torchbowmodtab", () ->
-            CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.torchBowModTab"))
-                    .icon(() -> new ItemStack(torchbow.get()))
-                    .displayItems((parameters,output) -> {
-                        output.accept(torchbow.get());
-                        output.accept(multiTorch.get());
-                        output.accept(torchArrow.get());
-                    }).build());
 
-    public TorchBowMod(IEventBus modEventBus, ModContainer modContainer) {
+    public static final Map<BlockItem, WallTorchBlock> ITEM_TO_WALL_BLOCK = new HashMap<>();
+
+    public TorchBowMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         TAB.register(modEventBus);
         modEventBus.addListener(this::initClient);
         modEventBus.addListener(this::preInit);
+        TAB.register("torchbowmodtab", () ->
+                CreativeModeTab.builder()
+                        .title(Component.translatable("itemGroup.torchBowModTab"))
+                        .icon(() -> new ItemStack(torchbow.get()))
+                        .displayItems((parameters,output) -> {
+                            output.accept(torchbow.get());
+                            output.accept(multiTorch.get());
+                            output.accept(torchArrow.get());
+                        }).build());
     }
 
     private void initClient(final FMLClientSetupEvent event) {
@@ -74,12 +84,33 @@ public class TorchBowMod {
 
     private void preInit(final FMLCommonSetupEvent event) {
         CeilingTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "torch"));
+        CeilingSoulTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "soul_torch"));
+        event.enqueueWork(() -> {
+            Map<String, Integer> modCountMap = new HashMap<>();
+            for (Block block : BuiltInRegistries.BLOCK) {
+                if (block instanceof WallTorchBlock wallBlock) {
+                    Item asItem = block.asItem();
+                    if (asItem instanceof BlockItem blockItem) {
+                        ITEM_TO_WALL_BLOCK.put(blockItem, wallBlock);
+                        TORCH_ITEMS.add(blockItem);
+                        String namespace = BuiltInRegistries.ITEM.getKey(asItem).getNamespace();
+                        modCountMap.merge(namespace, 1, Integer::sum);
+                    }
+                }
+            }
+            LOGGER.info("==== TorchBowMod Torch Item Auto-Registration Stats ====");
+            LOGGER.info("Total registered pairs: {}", ITEM_TO_WALL_BLOCK.size());
+            for (Map.Entry<String, Integer> entry : modCountMap.entrySet()) {
+                LOGGER.info("Namespace '{}' has {} torch items", entry.getKey(), entry.getValue());
+            }
+            LOGGER.info("========================================================");
+        });
     }
     @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class RegistryEvents {
         @SubscribeEvent
-        public static void registerEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerEntityRenderer(entityTorch.get(), RenderTorch::new);
+        public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerEntityRenderer(TorchBowMod.entityTorch.get(), RenderTorch::new);
         }
     }
 }
