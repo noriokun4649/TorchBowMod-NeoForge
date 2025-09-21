@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.WallTorchBlock;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -42,7 +41,6 @@ public class TorchBowMod {
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
     private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-    //@ObjectHolder(registryName = "ceilingtorch:torch", value = "ceilingtorch")
     public static Block CeilingTorch = null;
 
     public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().durability(384)));
@@ -55,24 +53,24 @@ public class TorchBowMod {
                     .setShouldReceiveVelocityUpdates(true)
                     .sized(0.5F, 0.5F)
                     .build("entitytorch"));
-    public static DeferredHolder<CreativeModeTab, CreativeModeTab> torchTab = TAB.register("torchbowmodtab", () ->
-            CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.torchBowModTab"))
-                    .icon(() -> new ItemStack(torchbow.get()))
-                    .displayItems((parameters,output) -> {
-                        output.accept(torchbow.get());
-                        output.accept(multiTorch.get());
-                        output.accept(torchArrow.get());
-                    }).build());
 
     public static final Map<BlockItem, WallTorchBlock> ITEM_TO_WALL_BLOCK = new HashMap<>();
 
-    public TorchBowMod(IEventBus modEventBus, ModContainer modContainer) {
+    public TorchBowMod(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         TAB.register(modEventBus);
         modEventBus.addListener(this::initClient);
         modEventBus.addListener(this::preInit);
+        TAB.register("torchbowmodtab", () ->
+                CreativeModeTab.builder()
+                        .title(Component.translatable("itemGroup.torchBowModTab"))
+                        .icon(() -> new ItemStack(torchbow.get()))
+                        .displayItems((parameters,output) -> {
+                            output.accept(torchbow.get());
+                            output.accept(multiTorch.get());
+                            output.accept(torchArrow.get());
+                        }).build());
     }
 
     private void initClient(final FMLClientSetupEvent event) {

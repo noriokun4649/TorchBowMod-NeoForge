@@ -11,6 +11,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -30,7 +32,7 @@ public class TorchBow extends ProjectileWeaponItem {
     public static final Predicate<ItemStack> TORCH_ARROW = itemStack -> itemStack.is(torchArrow.get());
     public static final Predicate<ItemStack> TORCH_BOW_ONLY;
 
-    private class Offsets {
+    private static class Offsets {
         private final float X;
         private final float Y;
 
@@ -49,7 +51,7 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    public void releaseUsing(ItemStack stack, Level level, LivingEntity entityLiving, int timeLeft) {
+    public void releaseUsing(@NotNull ItemStack stack, @NotNull Level level, @NotNull LivingEntity entityLiving, int timeLeft) {
         if (entityLiving instanceof Player player) {
             ItemStack itemstack = player.getProjectile(stack);
             if (!itemstack.isEmpty()) {
@@ -90,7 +92,7 @@ public class TorchBow extends ProjectileWeaponItem {
         if (i < 9){
             float range = 10F;
             Offsets[] offsets = {
-                    new Offsets(0F,0F),
+                    new Offsets(0F, 0F),
                     new Offsets(-range, -range),
                     new Offsets(-range, 0.0F),
                     new Offsets(-range, range),
@@ -132,11 +134,11 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+    public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand usedHand) {
         ItemStack itemstack = player.getItemInHand(usedHand);
         boolean flag = !player.getProjectile(itemstack).isEmpty();
 
-        InteractionResultHolder<ItemStack> ret = net.neoforged.neoforge.event.EventHooks.onArrowNock(itemstack, level, player, usedHand, flag);
+        InteractionResultHolder<ItemStack> ret = EventHooks.onArrowNock(itemstack, level, player, usedHand, flag);
         if (ret != null) return ret;
 
         if (!player.hasInfiniteMaterials() && !flag) {
@@ -156,9 +158,9 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
-    protected @NotNull Projectile createProjectile(@NotNull Level worldIn, @NotNull LivingEntity livingEntity, @NotNull ItemStack weaponStack, ItemStack pickupItem, boolean p_336242_) {
+    protected @NotNull Projectile createProjectile(@NotNull Level worldIn, @NotNull LivingEntity livingEntity, @NotNull ItemStack weaponStack, @NotNull ItemStack pickupItem, boolean p_336242_) {
         if (pickupItem.is(multiTorch.get())) pickupItem = Items.TORCH.getDefaultInstance();
-        EntityTorch abstractedly = new EntityTorch(worldIn, livingEntity, pickupItem.copyWithCount(1), weaponStack);
-        return abstractedly;
+        return new EntityTorch(worldIn, livingEntity, pickupItem.copyWithCount(1), weaponStack);
     }
+
 }

@@ -37,7 +37,7 @@ public class RenderTorch extends ArrowRenderer<EntityTorch> {
         return TorchTextures;
     }
 
-    public void render(EntityTorch entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+    public void render(EntityTorch entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
         ItemStack itemStack = entity.getTorchItem();
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
 
