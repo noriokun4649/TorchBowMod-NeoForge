@@ -5,29 +5,27 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
-import static mod.torchbowmod.TorchBowMod.multiTorch;
-import static mod.torchbowmod.TorchBowMod.torchArrow;
+import static mod.torchbowmod.TorchBowMod.*;
 
 public class TorchBow extends ProjectileWeaponItem {
+    public static final Set<BlockItem> TORCH_ITEMS = new HashSet<>();
 
-    public static final Predicate<ItemStack> TORCH = itemStack -> itemStack.is(Blocks.TORCH.asItem());
+    public static final Predicate<ItemStack> TORCH = itemStack -> itemStack.getItem() instanceof BlockItem bi && ITEM_TO_WALL_BLOCK.containsKey(bi);
     public static final Predicate<ItemStack> MULTI_TORCH = itemStack -> itemStack.is(multiTorch.get());
     public static final Predicate<ItemStack> TORCH_ARROW = itemStack -> itemStack.is(torchArrow.get());
     public static final Predicate<ItemStack> TORCH_BOW_ONLY;
