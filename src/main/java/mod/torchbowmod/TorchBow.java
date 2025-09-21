@@ -127,6 +127,11 @@ public class TorchBow extends ProjectileWeaponItem {
     }
 
     @Override
+    public @NotNull ItemStack getDefaultCreativeAmmo(@Nullable Player player, @NotNull ItemStack projectileWeaponItem) {
+        return Blocks.TORCH.asItem().getDefaultInstance();
+    }
+
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack itemstack = player.getItemInHand(usedHand);
         boolean flag = !player.getProjectile(itemstack).isEmpty();
