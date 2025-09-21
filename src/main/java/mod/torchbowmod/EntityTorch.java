@@ -26,6 +26,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
+import java.util.Map;
+import java.util.Set;
+
 import static mod.torchbowmod.TorchBowMod.*;
 import static net.minecraft.core.Direction.DOWN;
 import static net.minecraft.core.Direction.UP;
@@ -116,19 +119,18 @@ public class EntityTorch extends AbstractArrow {
         if (!this.level().getBlockState(blockpos).isAir()) {
             if (!level().isClientSide) {
                 Direction face = ((BlockHitResult) raytraceResultIn).getDirection();
-                BlockState torch_state = getWallBlockState();
+                BlockState wallBlockState = getWallBlockState();
                 BlockPos setBlockPos = getPosOfFace(blockpos, face);
                 if (isBlockAIR(setBlockPos)) {
                     if (face == UP) {
-                        torch_state = getBlockState();
-                        level().setBlock(setBlockPos,torch_state,3);
+                        level().setBlock(setBlockPos,getBlockState(),3);
                         this.remove(RemovalReason.KILLED);
-                    } else if (face == DOWN && CeilingTorch != null) {
-                        BlockState ceiling_torch = CeilingTorch.defaultBlockState();
+                    } else if (face == DOWN && isVanillaTorch(wallBlockState)) {
+                        BlockState ceiling_torch = getCeilingBlockState(wallBlockState);
                         level().setBlock(setBlockPos, ceiling_torch,3);
                         this.remove(RemovalReason.KILLED);
                     } else if (face != DOWN) {
-                        level().setBlock(setBlockPos, torch_state.setValue(HORIZONTAL_FACING, face), 3);
+                        level().setBlock(setBlockPos, wallBlockState.setValue(HORIZONTAL_FACING, face), 3);
                         this.remove(RemovalReason.KILLED);
                     }
                 }
@@ -147,6 +149,14 @@ public class EntityTorch extends AbstractArrow {
             return blockItem.getBlock().defaultBlockState();
         }
         return Blocks.TORCH.defaultBlockState();
+    }
+    private BlockState getCeilingBlockState(BlockState state){
+        if (CeilingTorch == null) return Blocks.TORCH.defaultBlockState();
+        var CEILING_MAP = Map.of(
+                Blocks.WALL_TORCH, CeilingTorch,
+                Blocks.SOUL_WALL_TORCH, CeilingSoulTorch
+        );
+        return CEILING_MAP.getOrDefault(state.getBlock(), Blocks.TORCH).defaultBlockState();
     }
 
     private BlockPos getPosOfFace(BlockPos blockPos, Direction face) {
@@ -168,6 +178,12 @@ public class EntityTorch extends AbstractArrow {
             if (getBlock == traget) return true;
         }
         return false;
+    }
+
+    private boolean isVanillaTorch(BlockState state){
+        if (CeilingTorch == null) return false;
+        var vanillaTorch = Set.of(Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH);
+        return vanillaTorch.contains(state.getBlock());
     }
 
     public ItemStack getTorchItem(){

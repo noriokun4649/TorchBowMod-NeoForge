@@ -42,6 +42,7 @@ public class TorchBowMod {
     private static final DeferredRegister<CreativeModeTab> TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static Block CeilingTorch = null;
+    public static Block CeilingSoulTorch = null;
 
     public static DeferredItem<Item> torchbow = ITEMS.register("torchbow", () -> new TorchBow(new Item.Properties().durability(384)));
     public static DeferredItem<Item> multiTorch = ITEMS.register("multitorch", () -> new Item(new Item.Properties().stacksTo(64)));
@@ -91,6 +92,7 @@ public class TorchBowMod {
 
     private void preInit(final FMLCommonSetupEvent event) {
         CeilingTorch = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "torch"));
+        CeilingSoulTorch = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "soul_torch"));
         event.enqueueWork(() -> {
             Map<String, Integer> modCountMap = new HashMap<>();
             for (Block block : BuiltInRegistries.BLOCK) {
