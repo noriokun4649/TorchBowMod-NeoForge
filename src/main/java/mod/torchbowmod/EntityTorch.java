@@ -173,11 +173,8 @@ public class EntityTorch extends AbstractArrow {
     private boolean isBlockAIR(BlockPos pos) {
         Block getBlock = this.level().getBlockState(pos).getBlock();
         if (getBlock instanceof BushBlock) return true;
-        Block[] a = {Blocks.CAVE_AIR, Blocks.AIR, Blocks.SNOW, Blocks.VINE};//空気だとみなすブロックリスト
-        for (Block traget : a) {
-            if (getBlock == traget) return true;
-        }
-        return false;
+        var airBlock = Set.of(Blocks.CAVE_AIR, Blocks.AIR, Blocks.SNOW, Blocks.VINE);//空気だとみなすブロックリスト
+        return airBlock.contains(getBlock);
     }
 
     private boolean isVanillaTorch(BlockState state){
