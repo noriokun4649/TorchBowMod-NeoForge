@@ -178,7 +178,7 @@ public class EntityTorch extends AbstractArrow {
     }
 
     private boolean isVanillaTorch(BlockState state){
-        if (CeilingTorch == null) return false;
+        if (CeilingTorch == Blocks.AIR) return false;
         var vanillaTorch = Set.of(Blocks.WALL_TORCH, Blocks.SOUL_WALL_TORCH);
         return vanillaTorch.contains(state.getBlock());
     }
