@@ -4,3 +4,4 @@
 - Verified with the following mods:
     - Adorn (Stone Torch)
     - More Beautiful Torches (all except Redstone Torch)
+- Bugfix: TorchArrow render issue.

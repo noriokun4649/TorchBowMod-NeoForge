@@ -151,12 +151,12 @@ public class EntityTorch extends AbstractArrow {
         return Blocks.TORCH.defaultBlockState();
     }
     private BlockState getCeilingBlockState(BlockState state){
-        if (CeilingTorch == null) return Blocks.TORCH.defaultBlockState();
+        if (CeilingTorch == null) return Blocks.WALL_TORCH.defaultBlockState();
         var CEILING_MAP = Map.of(
                 Blocks.WALL_TORCH, CeilingTorch,
                 Blocks.SOUL_WALL_TORCH, CeilingSoulTorch
         );
-        return CEILING_MAP.getOrDefault(state.getBlock(), Blocks.TORCH).defaultBlockState();
+        return CEILING_MAP.getOrDefault(state.getBlock(), Blocks.WALL_TORCH).defaultBlockState();
     }
 
     private BlockPos getPosOfFace(BlockPos blockPos, Direction face) {

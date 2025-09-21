@@ -14,8 +14,10 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientHooks;
@@ -39,6 +41,7 @@ public class RenderTorch extends ArrowRenderer<EntityTorch> {
 
     public void render(EntityTorch entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
         ItemStack itemStack = entity.getTorchItem();
+        if(!(itemStack.getItem() instanceof BlockItem)) itemStack = Blocks.TORCH.asItem().getDefaultInstance();
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
 
         if (!itemStack.isEmpty()) {
