@@ -3,8 +3,8 @@ package mod.torchbowmod;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.BlockItem;
@@ -41,10 +41,10 @@ public class TorchBowMod {
     public static Block CeilingTorch = null;
     public static Block CeilingSoulTorch = null;
 
-    public static final ResourceLocation TORCH_BOW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torchbow");
-    public static final ResourceLocation MULCH_TORCH_ID = ResourceLocation.fromNamespaceAndPath(MODID, "multitorch");
-    public static final ResourceLocation TORCH_ARROW_ID = ResourceLocation.fromNamespaceAndPath(MODID, "torcharrow");
-    public static final ResourceLocation TORCH_ENTITY = ResourceLocation.fromNamespaceAndPath(MODID,"entitytorch");
+    public static final Identifier TORCH_BOW_ID = Identifier.fromNamespaceAndPath(MODID, "torchbow");
+    public static final Identifier MULCH_TORCH_ID = Identifier.fromNamespaceAndPath(MODID, "multitorch");
+    public static final Identifier TORCH_ARROW_ID = Identifier.fromNamespaceAndPath(MODID, "torcharrow");
+    public static final Identifier TORCH_ENTITY = Identifier.fromNamespaceAndPath(MODID,"entitytorch");
     public static final ResourceKey<Item> TORCH_BOW_KEY = ResourceKey.create(Registries.ITEM, TORCH_BOW_ID);
     public static final ResourceKey<Item> MULCH_TORCH_KEY = ResourceKey.create(Registries.ITEM, MULCH_TORCH_ID);
     public static final ResourceKey<Item> TORCH_ARROW_KEY = ResourceKey.create(Registries.ITEM, TORCH_ARROW_ID);
@@ -83,8 +83,8 @@ public class TorchBowMod {
     }
 
     private void preInit(final FMLCommonSetupEvent event) {
-        CeilingTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "torch"));
-        CeilingSoulTorch = BuiltInRegistries.BLOCK.getValue(ResourceLocation.fromNamespaceAndPath("ceilingtorch", "soul_torch"));
+        CeilingTorch = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("ceilingtorch", "torch"));
+        CeilingSoulTorch = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("ceilingtorch", "soul_torch"));
         event.enqueueWork(() -> {
             Map<String, Integer> modCountMap = new HashMap<>();
             for (Block block : BuiltInRegistries.BLOCK) {
@@ -106,7 +106,7 @@ public class TorchBowMod {
             LOGGER.info("========================================================");
         });
     }
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
     public static class RegistryEvents {
         @SubscribeEvent
         public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
