@@ -1,1 +1,1 @@
-- Update 1.21.11
+- Fixed a bug that prevented it from being used on the server.
